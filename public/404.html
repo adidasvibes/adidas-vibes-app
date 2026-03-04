@@ -1,5 +1,5 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 
 <head>
     <meta charset="UTF-8" />
@@ -17,23 +17,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>adidas Vibes - Check Your Vibes!</title>
     <script>
-        (function () {
-            var q = window.location.search;
-            if (q.length > 2 && q[1] === '/') {
-                var decoded = q.slice(2).split('&').map(function (s) {
-                    return s.replace(/~and~/g, '&');
-                }).join('?');
-                window.history.replaceState(null, null,
-                    window.location.pathname + decoded + window.location.hash
-                );
-            }
-        })();
+        // Single Page Apps for GitHub Pages
+        // https://github.com/rafgraph/spa-github-pages
+        var pathSegmentsToKeep = 1;
+        var l = window.location;
+        l.replace(
+            l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+            l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+            l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+            (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+            l.hash
+        );
     </script>
 </head>
-
-<body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-</body>
 
 </html>
