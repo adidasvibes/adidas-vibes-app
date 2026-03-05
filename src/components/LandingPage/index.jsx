@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Star, Zap, ArrowRight, Sparkles, Loader, SearchX, MapPinOff, Home } from 'lucide-react';
 import { doc, getDoc } from 'firebase/firestore';
 import { db } from '../../config/firebase';
-import { APP_ID } from '../../constants/firebase';
+import { ARTIFACT_ID } from '../../constants/firebase';
 import { IMAGES } from '../../constants/assets';
 import { APP_CONFIG } from '../../config/app';
 
@@ -17,7 +17,7 @@ export const LandingPage = ({ startQuiz, eventId }) => {
             const fetchEvent = async () => {
                 try {
                     const eventDoc = await getDoc(
-                        doc(db, 'artifacts', APP_ID, 'public', 'data', 'events', eventId)
+                        doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events', eventId)
                     );
                     if (eventDoc.exists()) {
                         setEventData({ id: eventDoc.id, ...eventDoc.data() });
@@ -34,7 +34,7 @@ export const LandingPage = ({ startQuiz, eventId }) => {
             const fetchVouchers = async () => {
                 try {
                     const mpDoc = await getDoc(
-                        doc(db, 'artifacts', APP_ID, 'public', 'data')
+                        doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data')
                     );
                     if (mpDoc.exists()) {
                         setEventData({ id: null, marketplaces: mpDoc.data()?.marketplaces || [] });

@@ -6,7 +6,7 @@ import {
 } from 'recharts';
 import { Activity, Download, Filter, ArrowLeft, Loader, Users, Ticket, MapPin, Plus, Globe, Calendar, Trash2, Edit2 } from 'lucide-react';
 import { db } from '../config/firebase';
-import { APP_ID } from '../constants/firebase';
+import { ARTIFACT_ID } from '../constants/firebase';
 import { CustomTooltip, StatCard, PollCard } from '../components/InsightsCharts';
 import { downloadCSV } from '../utils/export';
 import { CHART_COLORS, MARKETPLACES } from '../constants/assets';
@@ -40,7 +40,7 @@ export const InsightsDashboard = () => {
         const fetchData = async () => {
             try {
                 const querySnapshot = await getDocs(
-                    collection(db, 'artifacts', APP_ID, 'public', 'data', 'vibe_codes')
+                    collection(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'vibe_codes')
                 );
                 const rawDocs = [];
 
@@ -65,7 +65,7 @@ export const InsightsDashboard = () => {
     const fetchEvents = async () => {
         try {
             const eventsSnapshot = await getDocs(
-                collection(db, 'artifacts', APP_ID, 'public', 'data', 'events')
+                collection(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events')
             );
             const eventsList = [];
             eventsSnapshot.forEach((doc) => {
@@ -81,7 +81,7 @@ export const InsightsDashboard = () => {
     const fetchVouchers = async () => {
         try {
             const mpDoc = await getDoc(
-                doc(db, 'artifacts', APP_ID, 'public', 'data')
+                doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data')
             );
             if (mpDoc.exists()) {
                 setFormData({
@@ -133,7 +133,7 @@ export const InsightsDashboard = () => {
         try {
             if (editingEventId) {
                 // Update existing event
-                const eventRef = doc(db, 'artifacts', APP_ID, 'public', 'data', 'events', editingEventId);
+                const eventRef = doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events', editingEventId);
                 await updateDoc(eventRef, {
                     name: formData.name,
                     location: formData.location,
@@ -157,7 +157,7 @@ export const InsightsDashboard = () => {
             } else {
                 // Create new event
                 const eventRef = await addDoc(
-                    collection(db, 'artifacts', APP_ID, 'public', 'data', 'events'),
+                    collection(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events'),
                     {
                         name: formData.name,
                         location: formData.location,
@@ -200,7 +200,7 @@ export const InsightsDashboard = () => {
         e.preventDefault();
         try {
             // Update vouchers
-            const eventRef = doc(db, 'artifacts', APP_ID, 'public', 'data');
+            const eventRef = doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data');
             await updateDoc(eventRef, { marketplaces: formData.marketplaces });
 
             alert('Voucher updated successfully!');

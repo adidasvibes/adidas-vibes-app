@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { doc, getDoc } from 'firebase/firestore';
 import { MapPin, Calendar, Globe, ArrowLeft, Loader } from 'lucide-react';
 import { db } from '../config/firebase';
-import { APP_ID } from '../constants/firebase';
+import { ARTIFACT_ID } from '../constants/firebase';
 
 export const EventPage = () => {
     const { eventId } = useParams();
@@ -15,7 +15,7 @@ export const EventPage = () => {
         const fetchEvent = async () => {
             try {
                 const eventDoc = await getDoc(
-                    doc(db, 'artifacts', APP_ID, 'public', 'data', 'events', eventId)
+                    doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events', eventId)
                 );
 
                 if (eventDoc.exists()) {

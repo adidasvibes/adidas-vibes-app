@@ -1,7 +1,7 @@
 import { useState, useCallback, useEffect } from 'react';
 import { doc, setDoc, serverTimestamp, collection, query, where, getDocs, getDoc } from 'firebase/firestore';
 import { db } from '../config/firebase';
-import { APP_ID } from '../constants/firebase';
+import { ARTIFACT_ID } from '../constants/firebase';
 import { QUESTIONS } from '../constants/quiz';
 import { RESULTS } from '../constants/results';
 import { shuffleArray, generateVibeCode, mapAnswers } from '../utils/helpers';
@@ -26,7 +26,7 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = null, demogr
             const fetchEventData = async () => {
                 try {
                     const eventDoc = await getDoc(
-                        doc(db, 'artifacts', APP_ID, 'public', 'data', 'events', eventId)
+                        doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events', eventId)
                     );
                     if (eventDoc.exists()) {
                         setEventData({ id: eventDoc.id, ...eventDoc.data() });
@@ -40,7 +40,7 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = null, demogr
             const fetchVouchers = async () => {
                 try {
                     const mpDoc = await getDoc(
-                        doc(db, 'artifacts', APP_ID, 'public', 'data')
+                        doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data')
                     );
                     if (mpDoc.exists()) {
                         setEventData({ id: null, marketplaces: mpDoc.data()?.marketplaces || [] });
@@ -67,7 +67,7 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = null, demogr
                 return;
             }
 
-            const codesRef = collection(db, 'artifacts', APP_ID, 'public', 'data', 'vibe_codes');
+            const codesRef = collection(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'vibe_codes');
             // Check for existing quiz completion for THIS event only
             let q;
             if (APP_CONFIG.enableEvents && eventId && eventId !== APP_CONFIG.defaultEventId) {
@@ -89,7 +89,7 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = null, demogr
                 if (existingData.eventId && !eventData) {
                     try {
                         const eventDoc = await getDoc(
-                            doc(db, 'artifacts', APP_ID, 'public', 'data', 'events', existingData.eventId)
+                            doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events', existingData.eventId)
                         );
                         if (eventDoc.exists()) {
                             fetchedEventData = eventDoc.data();
@@ -160,7 +160,7 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = null, demogr
                 const answerMap = mapAnswers(finalAnswers);
 
                 await setDoc(
-                    doc(db, 'artifacts', APP_ID, 'public', 'data', 'vibe_codes', uniqueCode),
+                    doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'vibe_codes', uniqueCode),
                     {
                         code: uniqueCode,
                         result: Object.keys(RESULTS).find(key => RESULTS[key].title === resultData.title),

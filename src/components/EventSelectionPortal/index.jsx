@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { ArrowRight, MapPin, Loader } from 'lucide-react';
 import { db } from '../../config/firebase';
-import { APP_ID } from '../../constants/firebase';
+import { ARTIFACT_ID } from '../../constants/firebase';
 
 export const EventSelectionPortal = ({ onSelectEvent }) => {
     const [events, setEvents] = useState([]);
@@ -12,7 +12,7 @@ export const EventSelectionPortal = ({ onSelectEvent }) => {
         const fetchActiveEvents = async () => {
             try {
                 const eventsSnapshot = await getDocs(
-                    collection(db, 'artifacts', APP_ID, 'public', 'data', 'events')
+                    collection(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events')
                 );
 
                 const today = new Date();

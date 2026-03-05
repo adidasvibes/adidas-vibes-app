@@ -1,5 +1,4 @@
-import React from 'react';
-import { Star, Sparkles, Activity, ShoppingBag, Heart } from 'lucide-react';
+import { Sparkles, Activity, ShoppingBag, Heart } from 'lucide-react';
 import { MARKETPLACES } from '../../constants/assets';
 import { RESULTS } from '../../constants/results';
 
@@ -10,8 +9,6 @@ const MARKETPLACE_COLORS = {
 };
 
 export const CustomerResult = ({ result, code, eventData }) => {
-    const marketplaceData = eventData?.marketplaces || [];
-    console.log(eventData);
     // Get result code for vibe-specific links
     const resultCode = Object.entries(RESULTS).find(([key, val]) => val.title === result.title)?.[1]?.code;
     return (
