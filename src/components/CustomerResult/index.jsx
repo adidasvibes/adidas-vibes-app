@@ -77,18 +77,20 @@ export const CustomerResult = ({ result, code, eventData }) => {
                         </div>
                     </div>
 
-                    <div className={`bg-gradient-to-br ${result.gradient} rounded-xl p-1 shadow-[6px_6px_0px_#1d248a] transform hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_#1d248a] transition-all cursor-default`}>
-                        <div className="border-2 border-white/40 rounded-lg p-4 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-sm relative overflow-hidden">
-                            <div className="absolute -right-4 -top-4 text-white/10 rotate-12">
-                                <ShoppingBag className="w-16 h-16" />
+                    {eventData?.vibeCodeActive === true && (
+                        <div className={`bg-gradient-to-br ${result.gradient} rounded-xl p-1 shadow-[6px_6px_0px_#1d248a] transform hover:translate-x-[2px] hover:translate-y-[2px] hover:shadow-[2px_2px_0px_#1d248a] transition-all cursor-default`}>
+                            <div className="border-2 border-white/40 rounded-lg p-4 bg-gradient-to-br from-white/10 to-transparent backdrop-blur-sm relative overflow-hidden">
+                                <div className="absolute -right-4 -top-4 text-white/10 rotate-12">
+                                    <ShoppingBag className="w-16 h-16" />
+                                </div>
+                                <p className="text-[8px] font-bold text-white/90 uppercase tracking-widest mb-2 relative z-10">Tunjukkan Kode Ini</p>
+                                <div className="text-4xl font-black font-mono tracking-widest text-white drop-shadow-[3px_3px_0px_rgba(0,0,0,0.3)] relative z-10 mb-3">
+                                    {code}
+                                </div>
+                                <p className="text-[8px] font-bold text-white/80 uppercase tracking-widest relative z-10">Untuk Klaim Free Vial Parfume</p>
                             </div>
-                            <p className="text-[8px] font-bold text-white/90 uppercase tracking-widest mb-2 relative z-10">Tunjukkan Kode Ini</p>
-                            <div className="text-4xl font-black font-mono tracking-widest text-white drop-shadow-[3px_3px_0px_rgba(0,0,0,0.3)] relative z-10 mb-3">
-                                {code}
-                            </div>
-                            <p className="text-[8px] font-bold text-white/80 uppercase tracking-widest relative z-10">Untuk Klaim Free Vial Parfume</p>
                         </div>
-                    </div>
+                    )}
 
                     {/* Marketplace Vouchers - Only show if event has marketplace data */}
                     {eventData?.marketplaces && eventData.marketplaces.length > 0 && (

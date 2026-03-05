@@ -25,11 +25,16 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = 'global', de
         if (APP_CONFIG.enableEvents && eventId && eventId !== APP_CONFIG.defaultEventId) {
             const fetchEventData = async () => {
                 try {
-                    const eventDoc = await getDoc(
-                        doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events', eventId)
-                    );
+                    const [eventDoc, rootDoc] = await Promise.all([
+                        getDoc(doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events', eventId)),
+                        getDoc(doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data'))
+                    ]);
                     if (eventDoc.exists()) {
-                        setEventData({ id: eventDoc.id, ...eventDoc.data() });
+                        setEventData({
+                            id: eventDoc.id,
+                            ...eventDoc.data(),
+                            vibeCodeActive: rootDoc.exists() ? (rootDoc.data()?.vibeCodeActive ?? false) : false
+                        });
                     }
                 } catch (error) {
                     console.error("Error fetching event data:", error);
@@ -43,7 +48,11 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = 'global', de
                         doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data')
                     );
                     if (mpDoc.exists()) {
-                        setEventData({ id: null, marketplaces: mpDoc.data()?.marketplaces || [] });
+                        setEventData({
+                            id: null,
+                            marketplaces: mpDoc.data()?.marketplaces || [],
+                            vibeCodeActive: mpDoc.data()?.vibeCodeActive ?? false
+                        });
                     } else {
                         console.log("No vouchers found");
                     }
@@ -88,14 +97,35 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = 'global', de
                 let fetchedEventData = eventData;
                 if (existingData.eventId && !eventData) {
                     try {
-                        const eventDoc = await getDoc(
-                            doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events', existingData.eventId)
-                        );
+                        const [eventDoc, rootDoc] = await Promise.all([
+                            getDoc(doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events', existingData.eventId)),
+                            getDoc(doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data'))
+                        ]);
+                        const vibeCodeActive = rootDoc.exists() ? (rootDoc.data()?.vibeCodeActive ?? false) : false;
                         if (eventDoc.exists()) {
-                            fetchedEventData = eventDoc.data();
+                            fetchedEventData = { ...eventDoc.data(), vibeCodeActive };
+                        } else {
+                            fetchedEventData = {
+                                id: null,
+                                marketplaces: rootDoc.exists() ? (rootDoc.data()?.marketplaces || []) : [],
+                                vibeCodeActive
+                            };
                         }
                     } catch (error) {
                         console.error("Error fetching event data for existing result:", error);
+                    }
+                } else if (!eventData) {
+                    try {
+                        const rootDoc = await getDoc(doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data'));
+                        if (rootDoc.exists()) {
+                            fetchedEventData = {
+                                id: null,
+                                marketplaces: rootDoc.data()?.marketplaces || [],
+                                vibeCodeActive: rootDoc.data()?.vibeCodeActive ?? false
+                            };
+                        }
+                    } catch (error) {
+                        console.error("Error fetching root data for existing result:", error);
                     }
                 }
 

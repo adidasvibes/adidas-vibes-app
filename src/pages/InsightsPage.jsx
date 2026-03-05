@@ -25,6 +25,7 @@ export const InsightsDashboard = () => {
     const [showEventForm, setShowEventForm] = useState(false);
     const [eventFilter, setEventFilter] = useState("All");
     const [editingEventId, setEditingEventId] = useState(null);
+    const [vibeCodeActive, setVibeCodeActive] = useState(false);
     const [formData, setFormData] = useState({
         name: '',
         location: '',
@@ -93,6 +94,7 @@ export const InsightsDashboard = () => {
                     endDate: '',
                     marketplaces: mpDoc.data()?.marketplaces || []
                 });
+                setVibeCodeActive(mpDoc.data()?.vibeCodeActive ?? false);
             } else {
                 console.log("No vouchers found");
             }
@@ -201,7 +203,7 @@ export const InsightsDashboard = () => {
         try {
             // Update vouchers
             const eventRef = doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data');
-            await updateDoc(eventRef, { marketplaces: formData.marketplaces });
+            await updateDoc(eventRef, { marketplaces: formData.marketplaces, vibeCodeActive });
 
             alert('Voucher updated successfully!');
         } catch (error) {
@@ -993,6 +995,24 @@ export const InsightsDashboard = () => {
                         {`✨ Configure ${APP_CONFIG.enableEvents ? 'Global ' : ''}Vouchers`}
                     </h3>
                     <form onSubmit={handleConfigureVouchers} className="space-y-6">
+
+                        {/* Vial Code Toggle */}
+                        <div className="flex items-center gap-4 p-4 bg-gray-50 rounded-xl border-2 border-gray-200">
+                            <input
+                                type="checkbox"
+                                id="vibeCodeActive"
+                                checked={vibeCodeActive}
+                                onChange={(e) => setVibeCodeActive(e.target.checked)}
+                                className="w-5 h-5 rounded accent-[#4338ca] cursor-pointer"
+                            />
+                            <label htmlFor="vibeCodeActive" className="flex flex-col cursor-pointer flex-1">
+                                <span className="text-sm font-black text-[#1d248a] uppercase tracking-wide">Show Vial Code to Customers</span>
+                                <span className="text-xs text-gray-500 mt-0.5">When enabled, customers will see their unique vial claim code on the result page</span>
+                            </label>
+                            <div className={`px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest ${vibeCodeActive ? 'bg-[#a3e635] text-[#1d248a]' : 'bg-gray-200 text-gray-500'}`}>
+                                {vibeCodeActive ? 'Active' : 'Inactive'}
+                            </div>
+                        </div>
 
                         {/* Marketplace Configuration */}
                         <div className="border-t-2 border-gray-200 pt-6">
