@@ -12,7 +12,7 @@ import { APP_CONFIG } from '../config/app';
 /**
  * Custom hook for managing quiz state and logic
  */
-export const useQuiz = (user, onQuizComplete = () => { }, eventId = null, demographics = null) => {
+export const useQuiz = (user, onQuizComplete = () => { }, eventId = 'global', demographics = null) => {
     const [currentQ, setCurrentQ] = useState(0);
     const [answers, setAnswers] = useState([]);
     const [shuffledQuestions, setShuffledQuestions] = useState(null);
@@ -75,7 +75,7 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = null, demogr
                 q = query(codesRef, where("uid", "==", user.uid), where("eventId", "==", eventId));
             } else {
                 // If no eventId, check if user has completed any quiz globally (backward compatibility)
-                q = query(codesRef, where("uid", "==", user.uid), where("eventId", "==", null));
+                q = query(codesRef, where("uid", "==", user.uid), where("eventId", "==", 'global'));
             }
 
             const querySnapshot = await getDocs(q);
@@ -169,7 +169,7 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = null, demogr
                         redeemed: false,
                         createdAt: serverTimestamp(),
                         uid: user.uid,
-                        eventId: eventId || null,
+                        eventId: eventId || 'global',
                         ageRange: demographicsData?.ageRange || null,
                         gender: demographicsData?.gender || null
                     }
