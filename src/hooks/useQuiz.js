@@ -67,83 +67,14 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = 'global', de
     // Check if user already completed quiz
     const checkQuizHistory = useCallback(async () => {
         try {
-            if (!user) {
-                setShuffledQuestions(QUESTIONS.map(q => ({
-                    ...q,
-                    options: shuffleArray(q.options)
-                })));
-                setCheckingHistory(false);
-                return;
-            }
-
-            const codesRef = collection(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'vibe_codes');
-            // Check for existing quiz completion for THIS event only
-            let q;
-            if (APP_CONFIG.enableEvents && eventId && eventId !== APP_CONFIG.defaultEventId) {
-                // If eventId exists, check only for this specific event
-                q = query(codesRef, where("uid", "==", user.uid), where("eventId", "==", eventId));
-            } else {
-                // If no eventId, check if user has completed any quiz globally (backward compatibility)
-                q = query(codesRef, where("uid", "==", user.uid), where("eventId", "==", 'global'));
-            }
-
-            const querySnapshot = await getDocs(q);
-
-            if (!querySnapshot.empty) {
-                const existingData = querySnapshot.docs[0].data();
-                const resultDetails = RESULTS[existingData.result];
-
-                // Fetch event data if eventId exists and not already loaded
-                let fetchedEventData = eventData;
-                if (existingData.eventId && !eventData) {
-                    try {
-                        const [eventDoc, rootDoc] = await Promise.all([
-                            getDoc(doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events', existingData.eventId)),
-                            getDoc(doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data'))
-                        ]);
-                        const vibeCodeActive = rootDoc.exists() ? (rootDoc.data()?.vibeCodeActive ?? false) : false;
-                        if (eventDoc.exists()) {
-                            fetchedEventData = { ...eventDoc.data(), vibeCodeActive };
-                        } else {
-                            fetchedEventData = {
-                                id: null,
-                                marketplaces: rootDoc.exists() ? (rootDoc.data()?.marketplaces || []) : [],
-                                vibeCodeActive
-                            };
-                        }
-                    } catch (error) {
-                        console.error("Error fetching event data for existing result:", error);
-                    }
-                } else if (!eventData) {
-                    try {
-                        const rootDoc = await getDoc(doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data'));
-                        if (rootDoc.exists()) {
-                            fetchedEventData = {
-                                id: null,
-                                marketplaces: rootDoc.data()?.marketplaces || [],
-                                vibeCodeActive: rootDoc.data()?.vibeCodeActive ?? false
-                            };
-                        }
-                    } catch (error) {
-                        console.error("Error fetching root data for existing result:", error);
-                    }
-                }
-
-                onQuizComplete({
-                    result: resultDetails,
-                    code: existingData.code,
-                    isExisting: true,
-                    eventData: fetchedEventData  // Include event data (fetched or pre-loaded)
-                });
-            } else {
-                const randomized = QUESTIONS.map(q => ({
-                    ...q,
-                    options: shuffleArray(q.options)
-                }));
-                setShuffledQuestions(randomized);
-            }
+            // Session checker removed - allow multiple quiz submissions per user
+            const randomized = QUESTIONS.map(q => ({
+                ...q,
+                options: shuffleArray(q.options)
+            }));
+            setShuffledQuestions(randomized);
         } catch (error) {
-            console.error("Error checking quiz history:", error);
+            console.error("Error initializing quiz:", error);
             setShuffledQuestions(QUESTIONS.map(q => ({
                 ...q,
                 options: shuffleArray(q.options)
