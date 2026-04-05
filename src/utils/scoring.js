@@ -7,7 +7,7 @@ export const calculateQuizResult = (finalAnswers) => {
   let scores = { ED: 0, SU: 0, FR: 0, CZ: 0, GC: 0 };
 
   finalAnswers.forEach((ans, index) => {
-    const points = (index === 2) ? 5 : 1; // Question 3 is weighted 5x to minimize ties
+    const points = (index === 2) ? 3 : 1; // Question 3 is weighted 3x to minimize ties
 
     if (ans === "A") scores.ED += points;
     else if (ans === "B") scores.SU += points;
