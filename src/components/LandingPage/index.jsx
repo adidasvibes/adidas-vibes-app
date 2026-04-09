@@ -1,54 +1,11 @@
-import React, { useState, useEffect } from 'react';
-import { Star, Zap, ArrowRight, Sparkles, Loader, SearchX, MapPinOff, Home } from 'lucide-react';
-import { doc, getDoc } from 'firebase/firestore';
-import { db } from '../../config/firebase';
-import { ARTIFACT_ID } from '../../constants/firebase';
+import { useState, useEffect } from 'react';
+import { ArrowRight, Loader, SearchX, MapPinOff, Home } from 'lucide-react';
 import { IMAGES } from '../../constants/assets';
 import { APP_CONFIG } from '../../config/app';
 
-export const LandingPage = ({ startQuiz, eventId }) => {
-    const [eventData, setEventData] = useState(null);
+export const LandingPage = ({ startQuiz, eventId, eventData, loading, notFound }) => {
     const [currentImageIndex, setCurrentImageIndex] = useState(0);
-    const [notFound, setNotFound] = useState(false);
     const productImages = Object.values(IMAGES); // Get all 5 product images
-
-    useEffect(() => {
-        if (APP_CONFIG.enableEvents && eventId && eventId !== APP_CONFIG.defaultEventId) {
-            const fetchEvent = async () => {
-                try {
-                    const eventDoc = await getDoc(
-                        doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events', eventId)
-                    );
-                    if (eventDoc.exists()) {
-                        setEventData({ id: eventDoc.id, ...eventDoc.data() });
-                    } else {
-                        setNotFound(true);
-                    }
-                } catch (error) {
-                    console.error("Error fetching event:", error);
-                    setNotFound(true);
-                }
-            };
-            fetchEvent().catch((error) => console.error(error));
-        } else {
-            const fetchVouchers = async () => {
-                try {
-                    const mpDoc = await getDoc(
-                        doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data')
-                    );
-                    if (mpDoc.exists()) {
-                        setEventData({ id: null, marketplaces: mpDoc.data()?.marketplaces || [] });
-                    } else {
-                        console.log("No vouchers found");
-                    }
-                } catch (error) {
-                    console.error("Error fetching vouchers:", error);
-                    setNotFound(true);
-                }
-            };
-            fetchVouchers().catch((error) => console.error(error));
-        }
-    }, [eventId]);
 
     // Shuffle product images with fade effect
     useEffect(() => {
@@ -59,7 +16,7 @@ export const LandingPage = ({ startQuiz, eventId }) => {
     }, [productImages.length]);
 
     // Event Not Found View
-    if (APP_CONFIG.enableEvents && eventId && notFound) {
+    if ((APP_CONFIG.enableEvents && eventId && notFound) || !!eventData?.error) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[80vh] px-4 text-center relative z-10">
                 {/* Background decorative elements */}
@@ -82,27 +39,31 @@ export const LandingPage = ({ startQuiz, eventId }) => {
                         Oops!
                     </div>
                     <div className="absolute -bottom-2 -left-4 bg-[#1d248a] text-white text-[10px] font-black uppercase px-3 py-1.5 rounded-full -rotate-12 shadow-[2px_2px_0px_#000] border-2 border-white">
-                        404
+                        {!!eventData?.error ? 503 : 404}
                     </div>
                 </div>
 
                 {/* Error Title */}
                 <h1 className="text-4xl md:text-6xl font-black text-white mb-4 tracking-tighter uppercase italic leading-tight drop-shadow-[4px_4px_0px_#1d248a]">
-                    Event <br />
-                    <span className="text-[#f58362]">Not Found</span>
+                    {!!eventData?.error ? 'Gagal' : 'Event'} <br />
+                    <span className="text-[#f58362]">{!!eventData?.error ? "Memuat" : "Not Found"}</span>
                 </h1>
 
                 {/* Error Message */}
                 <p className="text-white/90 text-sm md:text-base font-bold max-w-md mx-auto mb-3 leading-relaxed drop-shadow-md">
-                    🔍 Waduh, event yang kamu cari nggak ketemu nih!
+                    {!!eventData?.error ? "🔍 Terjadi kesalahan saat memuat konten!" : "🔍 Waduh, event yang kamu cari nggak ketemu nih!"}
                 </p>
 
-                <p className="text-white/70 text-xs md:text-sm max-w-lg mx-auto mb-8 leading-relaxed">
-                    Event-nya mungkin sudah berakhir, atau link-nya salah. Tapi tenang, kamu tetap bisa ikut quiz tanpa event! 🎉
+                <p className="text-white/70 text-xs md:text-sm max-w-lg mx-auto mb-4 leading-relaxed">
+                    {!!eventData?.error ? "Pastikan kamu menggunakan link yang benar atau coba lagi nanti." : "Event-nya mungkin sudah berakhir, atau link-nya salah. Tapi tenang, kamu tetap bisa ikut quiz tanpa event! 🎉"}
                 </p>
+
+                {!!eventData?.error && <p className="text-white/50 text-xs md:text-sm max-w-lg mx-auto mb-8 leading-relaxed">
+                    {eventData?.error ? `${eventData.error}` : "Pastikan kamu menggunakan link yang benar atau coba lagi nanti."}
+                </p>}
 
                 {/* Action Buttons */}
-                <div className="flex flex-col sm:flex-row gap-4 items-center">
+                {!eventData?.error && <div className="flex flex-col sm:flex-row gap-4 items-center">
                     <button
                         onClick={() => window.location.href = '/'}
                         className="group relative inline-flex items-center justify-center px-8 py-3 text-base font-black text-[#1d248a] transition-all duration-200 bg-white rounded-full focus:outline-none hover:scale-105 shadow-[5px_5px_0px_#1d248a] hover:shadow-[7px_7px_0px_#f58362] hover:-translate-y-1 uppercase tracking-wider italic border-4 border-transparent active:shadow-none active:translate-y-1"
@@ -118,12 +79,12 @@ export const LandingPage = ({ startQuiz, eventId }) => {
                         Mulai Quiz
                         <ArrowRight className="ml-2 w-5 h-5 group-hover:translate-x-2 transition-transform" />
                     </button>
-                </div>
+                </div>}
 
                 {/* Fun footer text */}
-                <p className="text-[9px] text-white/40 mt-8 uppercase tracking-[0.2em] drop-shadow-sm">
+                {!eventData?.error && <p className="text-[9px] text-white/40 mt-8 uppercase tracking-[0.2em] drop-shadow-sm">
                     Tidak ada event? Tidak masalah! ✨
-                </p>
+                </p>}
             </div>
         );
     }

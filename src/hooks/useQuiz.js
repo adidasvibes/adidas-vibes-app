@@ -19,28 +19,54 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = 'global', de
     const [isCalculating, setIsCalculating] = useState(false);
     const [checkingHistory, setCheckingHistory] = useState(true);
     const [eventData, setEventData] = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [notFound, setNotFound] = useState(false);
 
     // Fetch event data if eventId exists
     useEffect(() => {
         if (APP_CONFIG.enableEvents && eventId && eventId !== APP_CONFIG.defaultEventId) {
             const fetchEventData = async () => {
                 try {
-                    const [eventDoc, rootDoc] = await Promise.all([
-                        getDoc(doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events', eventId)),
-                        getDoc(doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data'))
-                    ]);
-                    if (eventDoc.exists()) {
+                    const eventDoc = await getDoc(doc(db, 'artifacts', ARTIFACT_ID, 'public', 'data', 'events', eventId));
+                    if (eventDoc.exists()) { // event-specific data takes precedence if it exists
                         setEventData({
                             id: eventDoc.id,
                             ...eventDoc.data(),
-                            vibeCodeActive: rootDoc.exists() ? (rootDoc.data()?.vibeCodeActive ?? false) : false
+                            vibeCodeActive: eventDoc.data()?.vibeCodeActive ?? false,
+                            error: null
                         });
+                    } else { // if no event data exists, set not found
+                        console.log("No event data found");
+                        setEventData({
+                            id: null,
+                            marketplaces: [],
+                            vibeCodeActive: false,
+                            error: "No event data found"
+                        });
+                        setNotFound(true);
                     }
+                    setLoading(false);
                 } catch (error) {
                     console.error("Error fetching event data:", error);
+                    setEventData({
+                        id: null,
+                        marketplaces: [],
+                        vibeCodeActive: false,
+                        error: "Error fetching event: " + error
+                    });
+                    setLoading(false);
                 }
             };
-            fetchEventData().catch((error) => console.error(error));
+            fetchEventData().catch((error) => {
+                console.error(error)
+                setEventData({
+                    id: null,
+                    marketplaces: [],
+                    vibeCodeActive: false,
+                    error
+                });
+                setLoading(false);
+            });
         } else {
             const fetchVouchers = async () => {
                 try {
@@ -51,16 +77,40 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = 'global', de
                         setEventData({
                             id: null,
                             marketplaces: mpDoc.data()?.marketplaces || [],
-                            vibeCodeActive: mpDoc.data()?.vibeCodeActive ?? false
+                            vibeCodeActive: mpDoc.data()?.vibeCodeActive ?? false,
+                            error: null
                         });
                     } else {
                         console.log("No vouchers found");
+                        setEventData({
+                            id: null,
+                            marketplaces: [],
+                            vibeCodeActive: false,
+                            error: "No vouchers found"
+                        });
                     }
+                    setLoading(false);
                 } catch (error) {
                     console.error("Error fetching vouchers:", error);
+                    setEventData({
+                        id: null,
+                        marketplaces: [],
+                        vibeCodeActive: false,
+                        error: "Error fetching vouchers: " + error
+                    });
+                    setLoading(false);
                 }
             };
-            fetchVouchers().catch((error) => console.error(error));
+            fetchVouchers().catch((error) => {
+                console.error(error);
+                setEventData({
+                    id: null,
+                    marketplaces: [],
+                    vibeCodeActive: false,
+                    error
+                });
+                setLoading(false);
+            });
         }
     }, [eventId]);
 
@@ -107,11 +157,18 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = 'global', de
                                 fetchedEventData = {
                                     id: null,
                                     marketplaces: rootDoc.exists() ? (rootDoc.data()?.marketplaces || []) : [],
-                                    vibeCodeActive
+                                    vibeCodeActive,
+                                    error: null
                                 };
                             }
                         } catch (error) {
                             console.error("Error fetching event data for existing result:", error);
+                            setEventData({
+                                id: null,
+                                marketplaces: [],
+                                vibeCodeActive: false,
+                                error: "Error fetching event data for existing result: " + error
+                            });
                         }
                     } else if (!eventData) {
                         try {
@@ -120,11 +177,18 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = 'global', de
                                 fetchedEventData = {
                                     id: null,
                                     marketplaces: rootDoc.data()?.marketplaces || [],
-                                    vibeCodeActive: rootDoc.data()?.vibeCodeActive ?? false
+                                    vibeCodeActive: rootDoc.data()?.vibeCodeActive ?? false,
+                                    error: null
                                 };
                             }
                         } catch (error) {
                             console.error("Error fetching root data for existing result:", error);
+                            setEventData({
+                                id: null,
+                                marketplaces: [],
+                                vibeCodeActive: false,
+                                error: "Error fetching root data for existing result: " + error
+                            });
                         }
                     }
 
@@ -245,6 +309,8 @@ export const useQuiz = (user, onQuizComplete = () => { }, eventId = 'global', de
         goToNextQuestion,
         checkQuizHistory,
         eventData,
-        setEventData
+        setEventData,
+        loading,
+        notFound
     };
 };

@@ -20,6 +20,7 @@ import { EventPage } from './pages/EventPage';
 import { getParameterByName } from './utils/helpers';
 import { APP_CONFIG } from './config/app';
 import { useQuiz } from './hooks/useQuiz';
+import { Loader } from 'lucide-react';
 
 // --- ROUTER FLOW COMPONENTS ---
 
@@ -57,7 +58,9 @@ const ClientFlow = ({ user }) => {
         goToNextQuestion,
         checkQuizHistory,
         eventData,
-        setEventData
+        setEventData,
+        loading,
+        notFound
     } = useQuiz(user, handleQuizComplete, eventId, demographics);
 
     useEffect(() => {
@@ -98,9 +101,17 @@ const ClientFlow = ({ user }) => {
         setView('result');
     };
 
+    // Show loader while fetching event data
+    if (loading) {
+        return <div className="min-h-screen flex flex-col items-center justify-center">
+            <Loader className="w-12 h-12 text-white animate-spin mb-4" />
+            <p className="text-white font-black uppercase tracking-widest animate-pulse">Loading Data...</p>
+        </div>
+    }
+
     return (
         <>
-            <nav className={`fixed w-full z-50 top-0 transition-all duration-300 ${scrollY > 50
+            {<nav className={`fixed w-full z-50 top-0 transition-all duration-300 ${scrollY > 50
                 ? 'backdrop-blur-xl shadow-lg'
                 : 'backdrop-blur-sm bg-transparent'
                 }`}>
@@ -121,11 +132,11 @@ const ClientFlow = ({ user }) => {
                         </div>
                     </div>
                 </div>
-            </nav>
+            </nav>}
 
-            <main className="pt-24 pb-20 relative w-full">
+            <main className={`pt-24 pb-20 relative w-full`}>
                 {view === 'event-selection' && APP_CONFIG.enableEvents && <EventSelectionPortal onSelectEvent={handleSelectEvent} />}
-                {view === 'home' && <LandingPage startQuiz={handleStartQuiz} eventId={APP_CONFIG.enableEvents && eventId !== APP_CONFIG.defaultEventId ? eventId : null} />}
+                {view === 'home' && <LandingPage startQuiz={handleStartQuiz} eventId={APP_CONFIG.enableEvents && eventId !== APP_CONFIG.defaultEventId ? eventId : null} eventData={eventData} notFound={notFound} />}
                 {view === 'demographics' && <DemographicsForm onSubmit={handleDemographicsSubmit} eventData={eventData} />}
                 {view === 'quiz' && (
                     <CustomerQuiz
